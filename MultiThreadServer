@@ -1,0 +1,49 @@
+import java.io.IOException;
+import java.net.Socket;
+
+import javax.swing.JOptionPane;
+
+public class MultiThreadServer extends Thread{
+
+	
+	Socket clientSocket;
+	ServerFrame frameInput;
+	Thread thread;
+	int closed = 0;
+	
+	public MultiThreadServer(Socket accept) throws IOException {
+		
+		clientSocket = accept;
+		frameInput = 
+				new ServerFrame(accept, Thread.currentThread());
+		frameInput.setVisible(true);
+		
+		int returnVal = 
+				JOptionPane.showConfirmDialog(frameInput, "Connect to " + accept.getInetAddress() + " ?", "Connect?", JOptionPane.YES_NO_OPTION);
+		if ( returnVal == JOptionPane.NO_OPTION){
+			accept.close();
+			closed = 1;
+			frameInput.dispose();
+		}
+		else
+			thread = new inputServer(frameInput.textArea, frameInput.pane_max, clientSocket);
+		
+		System.out.println("Napravljeno");
+	}
+	
+	public void run(){
+	
+		if( closed == 0)
+			thread.start();
+		else
+			this.interrupt();
+	
+
+	}
+	
+	
+	
+	
+	
+	
+}
