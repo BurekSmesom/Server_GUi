@@ -1,0 +1,26 @@
+import java.io.IOException;
+import java.net.ServerSocket;
+
+public class Server {
+
+	public static void main(String[] args){
+		if ( args.length != 1){
+			System.out.println("Usage: java Server <port>");
+			System.exit(-1);
+		}
+		
+		
+		try (	ServerSocket serverS =
+						new ServerSocket(Integer.parseInt(args[0])); ){
+			while(true)
+				new MultiThreadServer(serverS.accept()).start();
+			
+		} catch ( IOException e){
+			System.out.println("Cannot init connection !");
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	
+
+}
