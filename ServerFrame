@@ -1,0 +1,133 @@
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.time.LocalTime;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+public class ServerFrame extends JFrame {
+
+	private JPanel contentPane;
+	private JTextField textField;
+	JTextArea textArea;
+	PrintWriter out;
+	JScrollPane pane;
+	JScrollBar pane_max;
+
+	/**
+	 * Launch the application.
+	 */
+
+	/**
+	 * Create the frame.
+	 * @param thread 
+	 * @param thread2 
+	 * @throws IOException 
+	 */
+	public ServerFrame(Socket accept, Thread thread) throws IOException {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				try {
+					accept.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+				if (arg0.getKeyCode() == KeyEvent.VK_ENTER){
+					out.println(textField.getText());
+					      out.flush();	      
+				}
+					
+					
+			}
+		});
+
+		 out =
+			new PrintWriter(accept.getOutputStream(), true);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setBounds(100, 100, 246, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		textField = new JTextField();
+		textField.setBounds(45, 10, 86, 20);
+		contentPane.add(textField);
+		textField.setColumns(10);
+		
+		JLabel lblServer = new JLabel("Text:");
+		lblServer.setFont(new Font("Utsaah", Font.BOLD, 17));
+		lblServer.setBounds(10, 14, 46, 14);
+		contentPane.add(lblServer);
+		
+		textArea = new JTextArea();
+		textArea.setEditable(false);
+		textArea.setBounds(10, 41, 193, 209);
+		pane = new JScrollPane(textArea);
+		pane_max = pane.getVerticalScrollBar();
+		pane.setBounds(10, 41, 210, 209);
+		contentPane.add(pane);
+		
+		JButton btnNewButton = new JButton("Send");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+
+				java.time.LocalTime time 
+									= LocalTime.now();
+				
+				out.println(textField.getText());
+				out.flush();
+				
+
+				textArea.append(
+						time.getHour() + ":" +
+						time.getMinute() + ":" +
+						time.getSecond() + "  Ti: " 
+							+ textField.getText()+"\n");
+				textArea.update(textArea.getGraphics());
+				
+				pane_max.setValue( pane_max.getMaximum());
+				
+			}
+		});
+		btnNewButton.setBounds(141, 9, 79, 23);
+		contentPane.add(btnNewButton);
+	}
+	
+
+	public String getTextUser(){
+		return textField.getText();
+	}
+	
+	public void setTextUser(String txt){
+		
+		textArea.append(txt);
+		textArea.update(textArea.getGraphics());
+		
+	}
+}
