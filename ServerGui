@@ -1,0 +1,161 @@
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import java.awt.Color;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.nio.channels.ServerSocketChannel;
+import java.awt.event.ActionEvent;
+
+public class ServerGui {
+
+	private JFrame frame;
+	private JTextField textField;
+	private JButton btnStop;
+	private JButton btnNewButton;
+	ServerSocket serverS;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					ServerGui window = new ServerGui();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public ServerGui() {
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		
+		
+		frame = new JFrame();
+		frame.setBounds(100, 100, 288, 151);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
+		
+		textField = new JTextField();
+		textField.setBounds(176, 11, 86, 20);
+		frame.getContentPane().add(textField);
+		textField.setColumns(10);
+		
+		JLabel lblPort = new JLabel("Port:");
+		lblPort.setBounds(141, 14, 32, 14);
+		frame.getContentPane().add(lblPort);
+		
+		btnNewButton = new JButton("Start");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				server_main_thread main =
+						new server_main_thread(textField.getText());
+				main.start();
+				
+				btnStop.setEnabled(true);
+				btnNewButton.setEnabled(false);
+			}
+		});
+		btnNewButton.setBounds(176, 42, 86, 23);
+		frame.getContentPane().add(btnNewButton);
+
+		
+		btnStop = new JButton("Stop");
+		btnStop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				try {
+					serverS.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				btnStop.setEnabled(false);
+				btnNewButton.setEnabled(true);
+			}
+		});
+		btnStop.setEnabled(false);
+		btnStop.setBounds(176, 76, 86, 23);
+		frame.getContentPane().add(btnStop);
+		
+	}
+	
+	class server_main_thread extends Thread{
+	
+		String arg;
+		
+		public server_main_thread(String arg){
+			this.arg = arg;
+		}
+		
+	public void run(){
+		server_main(arg);
+	}
+		
+	public void server_main(String arg){
+		
+		if ( arg == null )
+			JOptionPane.showMessageDialog(null, "Enter the port!", "Port missing!", JOptionPane.WARNING_MESSAGE);
+		if ( !isNumeric(arg))
+			JOptionPane.showMessageDialog(null, "Port must be numeric!", "Port missing!", JOptionPane.WARNING_MESSAGE);
+			
+		
+		try {
+			
+			serverS =
+					new ServerSocket(Integer.parseInt(arg));
+			while(true)
+					new MultiThreadServer(serverS.accept()).start();
+			
+			
+			
+		} catch ( IOException e){
+			System.out.println("Cannot init connection !");
+			System.out.println(e.getMessage());
+		} finally{
+			try {
+				serverS.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	public boolean isNumeric(String arg){
+		
+		try{
+			Integer.parseInt(arg);
+		} catch(NumberFormatException e){
+			return false;
+		} 
+		
+		return true;
+		
+		
+	}
+	
+	}
+}
